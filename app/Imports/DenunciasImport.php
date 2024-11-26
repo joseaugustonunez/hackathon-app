@@ -4,6 +4,7 @@ namespace App\Imports;
 use App\Models\Denuncias;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Carbon\Carbon;
 
 class DenunciasImport
 {
@@ -17,19 +18,16 @@ class DenunciasImport
         // Número de columnas esperadas
         $expectedColumns = 16;
 
-        // Itera sobre las filas del archivo
         foreach ($rows as $index => $row) {
             if ($index === 0) {
-                // Salta la primera fila si es un encabezado
+                // Ignora la primera fila (encabezados)
                 continue;
             }
 
-            // Valida que la fila tenga al menos 16 columnas
-            if (count($row) < $expectedColumns) {
-                continue; // Ignora filas incompletas
-            }
+            // Completa las columnas faltantes con null
+            $row = array_pad($row, $expectedColumns, null);
 
-            // Inserta cada fila en la base de datos
+            // Procesa cada fila
             Denuncias::create([
                 'item' => $row[0] ?? null,
                 'canal' => $row[1] ?? null,
@@ -54,19 +52,20 @@ class DenunciasImport
     private function transformDate($excelDate)
     {
         if (!$excelDate) {
-            return null; // Retorna null si la fecha está vacía
+            return null; // Si la celda está vacía, devuelve null
         }
 
-        // Verifica si el dato es un número (formato válido para excelToDateTimeObject)
-        if (is_numeric($excelDate)) {
-            return Date::excelToDateTimeObject($excelDate)->format('Y-m-d');
-        }
-
-        // Si no es un número, intenta convertirlo como texto de fecha
         try {
-            return \Carbon\Carbon::parse($excelDate)->format('Y-m-d');
+            // Maneja diferentes formatos de fecha
+            if (is_numeric($excelDate)) {
+                // Formato de fecha de Excel
+                return Date::excelToDateTimeObject($excelDate)->format('Y-m-d');
+            } else {
+                // Formato de texto (ejemplo: 30/12/2022 o 10-02-23)
+                return Carbon::parse($excelDate)->format('Y-m-d');
+            }
         } catch (\Exception $e) {
-            return null; // Retorna null si no es una fecha válida
+            return null; // Si la fecha no es válida, devuelve null
         }
     }
 }

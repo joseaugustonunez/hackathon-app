@@ -42,7 +42,7 @@
                 <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password">
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">{{ __('Register') }}</button>
+            <button type="submit" class="btn btn-danger w-100">{{ __('Register') }}</button>
         </form>
     </div>
 </div>

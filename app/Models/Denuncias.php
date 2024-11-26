@@ -25,5 +25,6 @@ class Denuncias extends Model
         'auditor_evaluacion',
         'fecha_culminacion',
         'resultado_evaluacion',
+        'estado',
     ];
 }
